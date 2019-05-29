@@ -94,7 +94,7 @@ return [
     */
 
     'trim' => [
-        'recent' => 10080,
+        'recent' => 60,
         'failed' => 10080,
         'monitored' => 10080,
     ],
@@ -146,6 +146,8 @@ return [
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'timeout' => 900,
+                'retry_after' => 1200,
             ],
         ],
 
@@ -154,8 +156,10 @@ return [
                 'connection' => 'redis',
                 'queue' => ['default'],
                 'balance' => 'simple',
-                'processes' => 10,
+                'processes' => 40,
                 'tries' => 3,
+                'timeout' => 900,
+                'retry_after' => 1200,
             ],
         ],
     ],

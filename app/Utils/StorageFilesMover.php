@@ -2,8 +2,10 @@
 
 namespace App\Utils;
 
+use Exception;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use League\Flysystem\FileExistsException;
 use League\Flysystem\MountManager;
 
 /**
@@ -13,17 +15,13 @@ use League\Flysystem\MountManager;
 class StorageFilesMover
 {
     /**
-     * @var \Illuminate\Contracts\Filesystem\Filesystem
+     * @var Filesystem
      */
     private $sourceDisk;
     /**
-     * @var \Illuminate\Contracts\Filesystem\Filesystem
+     * @var Filesystem
      */
     private $destinationDisk;
-    /**
-     * @var MountManager
-     */
-    private $mountManager;
 
     /**
      * StorageFilesMover constructor.
@@ -34,10 +32,6 @@ class StorageFilesMover
     {
         $this->sourceDisk = Storage::disk($sourceDiskName);
         $this->destinationDisk = Storage::disk($destinationDiskName);
-        $this->mountManager = new MountManager([
-            'source' => $this->sourceDisk->getDriver(),
-            'destination' => $this->destinationDisk->getDriver(),
-        ]);
     }
 
     /**
@@ -83,7 +77,20 @@ class StorageFilesMover
             $this->destinationDisk->delete($destination);
         }
 
-        $this->mountManager->move('source://' . $source, 'destination://' . $destination, $config);
+        try {
+            $this->destinationDisk
+                ->getDriver()
+                ->writeStream(
+                    $destination,
+                    $this->sourceDisk->getDriver()->readStream($source)
+                );
+
+            $this->sourceDisk->delete($source);
+        } catch (Exception $exception) {
+            Log::debug('Exception during moving file ' . $this->file);
+            Log::debug($exception->__toString());
+            Log::debug($exception->getTraceAsString());
+        }
     }
 
     /**
@@ -97,6 +104,17 @@ class StorageFilesMover
             $this->destinationDisk->delete($destination);
         }
 
-        $this->mountManager->copy('source://' . $source, 'destination://' . $destination, $config);
+        try {
+            $this->destinationDisk
+                ->getDriver()
+                ->writeStream(
+                    $destination,
+                    $this->sourceDisk->getDriver()->readStream($source)
+                );
+        } catch (Exception $exception) {
+            Log::debug('Exception during copying file ' . $this->file);
+            Log::debug($exception->__toString());
+            Log::debug($exception->getTraceAsString());
+        }
     }
 }
