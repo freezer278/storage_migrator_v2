@@ -6,7 +6,6 @@ use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use League\Flysystem\MountManager;
 
 /**
  * Class StorageFilesMover
@@ -87,7 +86,7 @@ class StorageFilesMover
 
             $this->sourceDisk->delete($source);
         } catch (Exception $exception) {
-            Log::debug('Exception during moving file ' . $this->file);
+            Log::debug('Exception during moving file ' . $source);
             Log::debug($exception->__toString());
             Log::debug($exception->getTraceAsString());
         }
@@ -112,7 +111,7 @@ class StorageFilesMover
                     $this->sourceDisk->getDriver()->readStream($source)
                 );
         } catch (Exception $exception) {
-            Log::debug('Exception during copying file ' . $this->file);
+            Log::debug('Exception during copying file ' . $source);
             Log::debug($exception->__toString());
             Log::debug($exception->getTraceAsString());
         }

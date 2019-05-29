@@ -29,6 +29,16 @@ class MigrateSingleFile implements ShouldQueue
     }
 
     /**
+     * Get the tags that should be assigned to the job.
+     *
+     * @return array
+     */
+    public function tags()
+    {
+        return [$this->file];
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
