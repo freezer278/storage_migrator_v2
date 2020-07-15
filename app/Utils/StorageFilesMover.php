@@ -73,7 +73,7 @@ class StorageFilesMover
     public function move(string $source, string $destination, array $config = []): void
     {
         if ($this->destinationDisk->exists($destination)) {
-            $this->destinationDisk->delete($destination);
+            return;
         }
 
         try {

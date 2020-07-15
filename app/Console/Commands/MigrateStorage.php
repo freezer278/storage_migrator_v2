@@ -11,8 +11,6 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class MigrateStorage extends Command
 {
-    const TEMP_FOLDER = 'temp/';
-
     /**
      * The name and signature of the console command.
      *
@@ -40,20 +38,27 @@ class MigrateStorage extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        $files = Storage::disk('source')->allFiles('/');
-
-        $totalFiles = count($files);
-
         $output = new ConsoleOutput();
-        $bar = new ProgressBar($output, $totalFiles);
+        $directories = Storage::disk('source')->directories('/');
 
-        foreach ($files as $file) {
-            MigrateSingleFile::dispatch($file);
-            $bar->advance();
+        $totalDirectories = count($directories);
+        $barCounter = $totalDirectories;
+        $bar = new ProgressBar($output, $barCounter);
+
+        foreach ($directories as $directory) {
+            $files = Storage::disk('source')->allFiles($directory);
+
+            $barCounter += (count($files) - 1);
+            $bar->setMaxSteps($barCounter);
+
+            foreach ($files as $file) {
+                MigrateSingleFile::dispatch($file);
+                $bar->advance();
+            }
         }
 
         $bar->finish();
