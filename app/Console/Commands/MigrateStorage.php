@@ -42,23 +42,16 @@ class MigrateStorage extends Command
      */
     public function handle(): void
     {
+        $files = Storage::disk('source')->allFiles('/');
+
+        $totalFiles = count($files);
+
         $output = new ConsoleOutput();
-        $directories = Storage::disk('source')->directories('/');
+        $bar = new ProgressBar($output, $totalFiles);
 
-        $totalDirectories = count($directories);
-        $barCounter = $totalDirectories;
-        $bar = new ProgressBar($output, $barCounter);
-
-        foreach ($directories as $directory) {
-            $files = Storage::disk('source')->allFiles($directory);
-
-            $barCounter += (count($files) - 1);
-            $bar->setMaxSteps($barCounter);
-
-            foreach ($files as $file) {
-                MigrateSingleFile::dispatch($file);
-                $bar->advance();
-            }
+        foreach ($files as $file) {
+            MigrateSingleFile::dispatch($file);
+            $bar->advance();
         }
 
         $bar->finish();
