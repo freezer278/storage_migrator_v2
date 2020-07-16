@@ -100,7 +100,7 @@ class StorageFilesMover
     public function copy(string $source, string $destination, array $config = []): void
     {
         if ($this->destinationDisk->exists($destination)) {
-            $this->destinationDisk->delete($destination);
+            return;
         }
 
         try {
